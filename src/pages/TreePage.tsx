@@ -136,7 +136,7 @@ export default function TreePage() {
           <ul className="text-gray-300 text-sm space-y-1">
             <li>• Ağacın herhangi bir yerine tıklayıp not bırak</li>
             <li>• İşaretçilerin üzerinde durarak kimin bıraktığını gör</li>
-            <li>• Notları yalnızca adminler okuyabilir</li>
+            <li>• Unutma, notunu kimse göremez! 🤫</li>
           </ul>
         </div>
       </main>
