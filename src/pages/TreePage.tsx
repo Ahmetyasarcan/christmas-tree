@@ -4,6 +4,7 @@ import { useNotes } from '../hooks/useNotes';
 import { supabase } from '../lib/supabaseClient';
 import TreeScene from '../components/TreeScene';
 import NoteForm from '../components/NoteForm';
+import Toast from '../components/Toast';
 import type { Profile } from '../types';
 
 export default function TreePage() {
@@ -11,6 +12,7 @@ export default function TreePage() {
   const { notes, createNote } = useNotes();
   const [selectedPosition, setSelectedPosition] = useState<{ x: number; y: number; z: number } | null>(null);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Fetch profiles for all notes
   useEffect(() => {
@@ -72,6 +74,8 @@ export default function TreePage() {
         });
       }
 
+
+      setToastMessage('Notunuz alındı! 🎄 Mailinizi kontrol etmeyi unutmayın. İyi Noeller! 🎅');
       setSelectedPosition(null);
     } catch (error) {
       console.error('Error creating note:', error);
@@ -147,6 +151,13 @@ export default function TreePage() {
           position={selectedPosition}
           onSubmit={handleNoteSubmit}
           onCancel={handleCancelNote}
+        />
+      )}
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
         />
       )}
     </div>
