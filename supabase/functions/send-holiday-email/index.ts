@@ -44,7 +44,8 @@ const PLAYLIST = [
     { title: "Duman - Bal", url: "https://www.youtube.com/watch?v=NUXbWSsMLSI&list=RDNUXbWSsMLSI&start_radio=1" },
     { title: "Halit Bilgiç - Özledim Seni", url: "https://www.youtube.com/watch?v=sJxOk5nqhDo&list=RDsJxOk5nqhDo&start_radio=1" },
     { title: "Ayla Dikmen - İlk ve Son Aşkım Sen Olacaksın", url: "https://www.youtube.com/watch?v=LCg7daZtE9s&list=RDLCg7daZtE9s&start_radio=1" },
-    { title: "Sezen Aksu - Ben Her Bahar Aşık Olurum", url: "https://www.youtube.com/watch?v=vS0oVjcxC_o&list=RDvS0oVjcxC_o&start_radio=1" }
+    { title: "Sezen Aksu - Ben Her Bahar Aşık Olurum", url: "https://www.youtube.com/watch?v=vS0oVjcxC_o&list=RDvS0oVjcxC_o&start_radio=1" },
+    { title: "Halil Kalay - Esmer Ata Atladı", url: "https://www.youtube.com/watch?v=sxf1e3sS5-M" }
 ];
 
 const corsHeaders = {
