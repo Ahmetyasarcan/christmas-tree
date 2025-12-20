@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import TreeScene from '../components/TreeScene';
 import NoteForm from '../components/NoteForm';
 import Toast from '../components/Toast';
+import BackgroundMusic from '../components/BackgroundMusic';
 import type { Profile } from '../types';
 
 export default function TreePage() {
@@ -92,8 +93,8 @@ export default function TreePage() {
       {/* Top bar */}
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-white">🎄 Interactive Christmas Tree</h1>
-          <span className="text-gray-400 text-sm">Secret Notes</span>
+          <h1 className="text-2xl font-bold text-white">🎄 İnteraktif Yılbaşı Ağacı</h1>
+          <span className="text-gray-400 text-sm">Gizli Notlar</span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -115,7 +116,7 @@ export default function TreePage() {
               href="/admin"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              Admin Panel
+              Admin Paneli
             </a>
           )}
 
@@ -123,7 +124,7 @@ export default function TreePage() {
             onClick={signOut}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Sign Out
+            Çıkış Yap
           </button>
         </div>
       </header>
@@ -131,7 +132,12 @@ export default function TreePage() {
       {/* Main tree area */}
       <main className="flex-1 relative">
         <div className="absolute inset-0">
-          <TreeScene notes={notes} profiles={profiles} onTreeClick={handleTreeClick} />
+          <TreeScene
+            notes={notes}
+            profiles={profiles}
+            onTreeClick={handleTreeClick}
+            hideLabels={!!selectedPosition}
+          />
         </div>
 
         {/* Instructions overlay */}
@@ -160,6 +166,8 @@ export default function TreePage() {
           onClose={() => setToastMessage(null)}
         />
       )}
+
+      <BackgroundMusic />
     </div>
   );
 }

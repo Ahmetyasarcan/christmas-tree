@@ -18,7 +18,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-white">Loading...</div>
+        <div className="text-white">Yükleniyor...</div>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function AuthGate({ children }: AuthGateProps) {
         await signIn(email, password);
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Kimlik doğrulama hatası');
     } finally {
       setSubmitting(false);
     }

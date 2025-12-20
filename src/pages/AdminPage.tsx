@@ -17,7 +17,7 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-white">Access denied. Redirecting...</div>
+        <div className="text-white">Erişim reddedildi. Yönlendiriliyor...</div>
       </div>
     );
   }
@@ -27,8 +27,8 @@ export default function AdminPage() {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-white">🔐 Admin Panel</h1>
-          <span className="text-gray-400 text-sm">Secret Notes Viewer</span>
+          <h1 className="text-2xl font-bold text-white">🔐 Admin Paneli</h1>
+          <span className="text-gray-400 text-sm">Gizli Not Görüntüleyici</span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -36,13 +36,13 @@ export default function AdminPage() {
             href="/"
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Back to Tree
+            Ağaca Dön
           </a>
           <button
             onClick={signOut}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Sign Out
+            Çıkış Yap
           </button>
         </div>
       </header>
@@ -50,19 +50,19 @@ export default function AdminPage() {
       {/* Main content */}
       <main className="container mx-auto px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">All Notes ({notes.length})</h2>
+          <h2 className="text-xl font-semibold text-white">Tüm Notlar ({notes.length})</h2>
           <button
             onClick={refetch}
             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Refresh
+            Yenile
           </button>
         </div>
 
         {loading ? (
-          <div className="text-center text-gray-400 py-12">Loading notes...</div>
+          <div className="text-center text-gray-400 py-12">Notlar yükleniyor...</div>
         ) : notes.length === 0 ? (
-          <div className="text-center text-gray-400 py-12">No notes yet.</div>
+          <div className="text-center text-gray-400 py-12">Henüz not yok.</div>
         ) : (
           <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
             <div className="overflow-x-auto">
@@ -70,16 +70,16 @@ export default function AdminPage() {
                 <thead className="bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Date
+                      Tarih
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      User
+                      Kullanıcı
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Position
+                      Konum
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Note Text
+                      Not
                     </th>
                   </tr>
                 </thead>
@@ -99,7 +99,7 @@ export default function AdminPage() {
                             />
                           )}
                           <span className="text-sm text-white font-medium">
-                            {note.profile?.username || 'Unknown'}
+                            {note.profile?.username || 'Bilinmiyor'}
                           </span>
                         </div>
                       </td>
@@ -110,7 +110,7 @@ export default function AdminPage() {
                         <div className="bg-gray-700/50 rounded p-2 border border-gray-600">
                           {note.text || (
                             <span className="text-gray-500 italic">
-                              Note text not available (RLS may be blocking access)
+                              Not metni yok (RLS erişimi engelliyor olabilir)
                             </span>
                           )}
                         </div>
@@ -127,9 +127,8 @@ export default function AdminPage() {
         {notes.length > 0 && notes.some((n) => !n.text) && (
           <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg">
             <p className="text-yellow-200 text-sm">
-              <strong>Note:</strong> Some notes are missing text content. This may be due to RLS
-              policies. You may need to use a service role key or create a database function to
-              access note text as an admin.
+              <strong>Not:</strong> Bazı notların içeriği eksik. Bu RLS (Satır Düzeyi Güvenlik) politikalarından kaynaklanıyor olabilir.
+              Admin olarak notları görmek için service role key kullanmanız gerekebilir.
             </p>
           </div>
         )}

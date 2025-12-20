@@ -16,7 +16,7 @@ export default function NoteForm({ position, onSubmit, onCancel }: NoteFormProps
     setError(null);
 
     if (!text.trim()) {
-      setError('Note text is required');
+      setError('Not yazısı gerekli');
       return;
     }
 
@@ -25,7 +25,7 @@ export default function NoteForm({ position, onSubmit, onCancel }: NoteFormProps
       await onSubmit(text.trim());
       setText('');
     } catch (err: any) {
-      setError(err.message || 'Failed to create note');
+      setError(err.message || 'Not oluşturulamadı');
     } finally {
       setSubmitting(false);
     }
@@ -34,15 +34,15 @@ export default function NoteForm({ position, onSubmit, onCancel }: NoteFormProps
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
-        <h3 className="text-xl font-bold text-white mb-4">Drop a Note</h3>
+        <h3 className="text-xl font-bold text-white mb-4">Bir Not Bırak</h3>
         <p className="text-gray-400 text-sm mb-4">
-          Position: ({position.x.toFixed(2)}, {position.y.toFixed(2)}, {position.z.toFixed(2)})
+          Konum: ({position.x.toFixed(2)}, {position.y.toFixed(2)}, {position.z.toFixed(2)})
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="note-text" className="block text-sm font-medium text-gray-300 mb-2">
-              Your Secret Note
+              Gizli Notun
             </label>
             <textarea
               id="note-text"
@@ -52,7 +52,7 @@ export default function NoteForm({ position, onSubmit, onCancel }: NoteFormProps
               rows={4}
               maxLength={500}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-              placeholder="Write your secret note here..."
+              placeholder="Gizli notunu buraya yaz..."
             />
             <p className="mt-1 text-xs text-gray-400">{text.length}/500</p>
           </div>
@@ -70,14 +70,14 @@ export default function NoteForm({ position, onSubmit, onCancel }: NoteFormProps
               disabled={submitting}
               className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
             >
-              Cancel
+              İptal
             </button>
             <button
               type="submit"
               disabled={submitting || !text.trim()}
               className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
             >
-              {submitting ? 'Dropping...' : 'Drop Note'}
+              {submitting ? 'Bırakılıyor...' : 'Notu Bırak'}
             </button>
           </div>
         </form>

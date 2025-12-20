@@ -8,6 +8,7 @@ interface TreeSceneProps {
   notes: Note[];
   profiles: Map<string, Profile>;
   onTreeClick: (point: THREE.Vector3) => void;
+  hideLabels?: boolean;
 }
 
 export default function TreeScene(props: TreeSceneProps) {
@@ -25,7 +26,7 @@ export default function TreeScene(props: TreeSceneProps) {
   );
 }
 
-function TreeContents({ notes, profiles, onTreeClick }: TreeSceneProps) {
+function TreeContents({ notes, profiles, onTreeClick, hideLabels }: TreeSceneProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
   const pointer = useMemo(() => new THREE.Vector2(), []);
@@ -105,6 +106,7 @@ function TreeContents({ notes, profiles, onTreeClick }: TreeSceneProps) {
 
         <ChristmasLights />
         <StarTopper />
+        <GroundDecorations />
 
         {notes.map((note) => {
           const profile = profiles.get(note.user_id);
@@ -112,8 +114,9 @@ function TreeContents({ notes, profiles, onTreeClick }: TreeSceneProps) {
             <BearMarker
               key={note.id}
               position={[note.x, note.y, note.z]}
-              username={profile?.username || 'Anonymous'}
+              username={profile?.username || 'Anonim'}
               avatarUrl={profile?.avatar_url || undefined}
+              hideLabel={hideLabels}
             />
           );
         })}
@@ -248,10 +251,12 @@ function BearMarker({
   position,
   username,
   avatarUrl,
+  hideLabel,
 }: {
   position: [number, number, number];
   username: string;
   avatarUrl?: string;
+  hideLabel?: boolean;
 }) {
   const [x, y, z] = position;
   const ref = useRef<THREE.Group>(null!);
@@ -338,20 +343,193 @@ function BearMarker({
       ))}
 
       {/* Floating name + avatar */}
-      <Billboard position={[0, 0.9, 0]} follow={true}>
-        <Html transform distanceFactor={6} style={{ pointerEvents: 'none', userSelect: 'none' }}>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-xl text-xs text-white">
-            {avatarUrl && (
-              <img
-                src={avatarUrl}
-                alt={username}
-                className="w-6 h-6 rounded-full border border-white/20"
-              />
-            )}
-            <span className="font-semibold drop-shadow-md">{username}</span>
-          </div>
-        </Html>
-      </Billboard>
+      {!hideLabel && (
+        <Billboard position={[0, 0.9, 0]} follow={true}>
+          <Html transform distanceFactor={6} style={{ pointerEvents: 'none', userSelect: 'none' }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-xl text-xs text-white">
+              {avatarUrl && (
+                <img
+                  src={avatarUrl}
+                  alt={username}
+                  className="w-6 h-6 rounded-full border border-white/20"
+                />
+              )}
+              <span className="font-semibold drop-shadow-md">{username}</span>
+            </div>
+          </Html>
+        </Billboard>
+      )}
+    </group>
+  );
+}
+
+function GroundDecorations() {
+  const decorations = useMemo(() => {
+    const items = [];
+
+    // 1. Massive amount of Gifts
+    for (let i = 0; i < 50; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 3.5 + Math.random() * 8; // Spread out to 11.5
+      items.push({
+        type: 'gift',
+        position: [Math.cos(angle) * radius, 0.3, Math.sin(angle) * radius] as [number, number, number],
+        rotation: [0, Math.random() * Math.PI, 0] as [number, number, number],
+        scale: 0.5 + Math.random() * 0.7,
+        color: ['#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#9d4edd', '#ff9f1c', '#ffffff'][Math.floor(Math.random() * 7)]
+      });
+    }
+
+    // 2. Snowmen
+    for (let i = 0; i < 8; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 5 + Math.random() * 6;
+      items.push({
+        type: 'snowman',
+        position: [Math.cos(angle) * radius, 0, Math.sin(angle) * radius] as [number, number, number],
+        rotation: [0, Math.random() * Math.PI, 0] as [number, number, number],
+        scale: 0.8 + Math.random() * 0.4,
+        color: 'white'
+      });
+    }
+
+    // 3. Toy Balls
+    for (let i = 0; i < 15; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 4 + Math.random() * 7;
+      items.push({
+        type: 'ball',
+        position: [Math.cos(angle) * radius, 0.2, Math.sin(angle) * radius] as [number, number, number],
+        rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0] as [number, number, number],
+        scale: 0.3 + Math.random() * 0.3,
+        color: ['#ff0000', '#00ff00', '#0000ff', '#ffff00'][Math.floor(Math.random() * 4)]
+      });
+    }
+
+    return items;
+  }, []);
+
+  return (
+    <group>
+      {decorations.map((d, i) => {
+        if (d.type === 'gift') return <GiftBox key={i} position={d.position} rotation={d.rotation} scale={d.scale} color={d.color} />;
+        if (d.type === 'snowman') return <Snowman key={i} position={d.position} rotation={d.rotation} scale={d.scale} />;
+        if (d.type === 'ball') return <ToyBall key={i} position={d.position} rotation={d.rotation} scale={d.scale} color={d.color} />;
+        return null;
+      })}
+      {/* Fixed candy canes scattered widely */}
+      {[...Array(10)].map((_, i) => {
+        const angle = (i / 10) * Math.PI * 2;
+        const radius = 4 + (i % 3) * 2;
+        return <CandyCane key={`cane-${i}`} position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]} rotation={[0, angle, 0]} />
+      })}
+    </group>
+  );
+}
+
+function GiftBox({ position, rotation, scale, color }: { position: [number, number, number], rotation: [number, number, number], scale: number, color: string }) {
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      <mesh castShadow receiveShadow position={[0, 0.25, 0]}>
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshStandardMaterial color={color} roughness={0.3} metalness={0.1} />
+      </mesh>
+      <mesh position={[0, 0.25, 0]}>
+        <boxGeometry args={[0.52, 0.5, 0.1]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 0.25, 0]}>
+        <boxGeometry args={[0.1, 0.5, 0.52]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 0.5, 0]}>
+        <torusGeometry args={[0.1, 0.03, 8, 16]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+function CandyCane({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <cylinderGeometry args={[0.08, 0.08, 1, 16]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <cylinderGeometry args={[0.085, 0.085, 1, 16]} />
+        <meshStandardMaterial color="#ff0000" transparent opacity={0.5} wireframe />
+      </mesh>
+      <mesh position={[0.15, 1.0, 0]} rotation={[0, 0, -Math.PI]}>
+        <torusGeometry args={[0.15, 0.08, 16, 24, Math.PI]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+    </group>
+  );
+}
+
+function Snowman({ position, rotation, scale }: { position: [number, number, number], rotation: [number, number, number], scale: number }) {
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      {/* Bottom */}
+      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[0.4, 24, 24]} />
+        <meshStandardMaterial color="white" roughness={0.8} />
+      </mesh>
+      {/* Middle */}
+      <mesh position={[0, 1.0, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[0.3, 24, 24]} />
+        <meshStandardMaterial color="white" roughness={0.8} />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[0.2, 24, 24]} />
+        <meshStandardMaterial color="white" roughness={0.8} />
+      </mesh>
+      {/* Eyes */}
+      <mesh position={[0.08, 1.55, 0.15]}>
+        <sphereGeometry args={[0.03]} />
+        <meshStandardMaterial color="black" />
+      </mesh>
+      <mesh position={[-0.08, 1.55, 0.15]}>
+        <sphereGeometry args={[0.03]} />
+        <meshStandardMaterial color="black" />
+      </mesh>
+      {/* Nose */}
+      <mesh position={[0, 1.5, 0.2]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[0.04, 0.2, 8]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+      {/* Arms */}
+      <mesh position={[0.25, 1.1, 0]} rotation={[0, 0, -0.5]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.5]} />
+        <meshStandardMaterial color="#4a3b2a" />
+      </mesh>
+      <mesh position={[-0.25, 1.1, 0]} rotation={[0, 0, 0.5]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.5]} />
+        <meshStandardMaterial color="#4a3b2a" />
+      </mesh>
+    </group>
+  );
+}
+
+function ToyBall({ position, rotation, scale, color }: { position: [number, number, number], rotation: [number, number, number], scale: number, color: string }) {
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      <mesh castShadow receiveShadow position={[0, 0.3, 0]}>
+        <sphereGeometry args={[0.3, 32, 32]} />
+        <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
+      </mesh>
+      {/* Stripe */}
+      <mesh position={[0, 0.3, 0]} scale={[1.02, 1.02, 1.02]}>
+        <torusGeometry args={[0.29, 0.02, 16, 32]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
+      <mesh position={[0, 0.3, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1.02, 1.02, 1.02]}>
+        <torusGeometry args={[0.29, 0.02, 16, 32]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
     </group>
   );
 }
