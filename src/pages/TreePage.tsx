@@ -6,6 +6,7 @@ import TreeScene from '../components/TreeScene';
 import NoteForm from '../components/NoteForm';
 import Toast from '../components/Toast';
 import BackgroundMusic from '../components/BackgroundMusic';
+import Countdown from '../components/Countdown';
 import type { Profile } from '../types';
 
 export default function TreePage() {
@@ -91,42 +92,46 @@ export default function TreePage() {
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Top bar */}
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+      <header className="bg-gray-800 border-b border-gray-700 px-6 py-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold text-white">🎄 İnteraktif Yılbaşı Ağacı</h1>
           <span className="text-gray-400 text-sm">Gizli Notlar</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          {profile && (
-            <div className="flex items-center gap-2">
-              {profile.avatar_url && (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.username}
-                  className="w-8 h-8 rounded-full"
-                />
-              )}
-              <span className="text-white font-medium">{profile.username}</span>
-            </div>
-          )}
+          <div className="hidden md:block">
+            <Countdown />
+          </div>
 
-          {isAdmin && (
-            <a
-              href="/admin"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+          <div className="flex items-center gap-4">
+            {profile && (
+              <div className="flex items-center gap-2">
+                {profile.avatar_url && (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.username}
+                    className="w-8 h-8 rounded-full"
+                  />
+                )}
+                <span className="text-white font-medium">{profile.username}</span>
+              </div>
+            )}
+
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Admin Paneli
+              </a>
+            )}
+
+            <button
+              onClick={signOut}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              Admin Paneli
-            </a>
-          )}
-
-          <button
-            onClick={signOut}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            Çıkış Yap
-          </button>
-        </div>
+              Çıkış Yap
+            </button>
+          </div>
       </header>
 
       {/* Main tree area */}

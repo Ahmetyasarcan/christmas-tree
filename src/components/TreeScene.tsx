@@ -107,6 +107,7 @@ function TreeContents({ notes, profiles, onTreeClick, hideLabels }: TreeScenePro
         <ChristmasLights />
         <StarTopper />
         <GroundDecorations />
+        {/* Fireworks removed for performance */}
 
         {notes.map((note) => {
           const profile = profiles.get(note.user_id);
@@ -199,6 +200,7 @@ function RealisticTreeLayer({ position, radius, height, color }: { position: [nu
 }
 
 function ChristmasLights() {
+  const lightsRef = useRef<THREE.Group>(null!);
   const lights = useMemo(() => {
     const list = [];
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
@@ -209,19 +211,50 @@ function ChristmasLights() {
       const angle = t * 1.5;
       list.push({
         pos: [Math.cos(angle) * r, y, Math.sin(angle) * r] as [number, number, number],
-        color: colors[Math.floor(Math.random() * colors.length)]
+        color: colors[Math.floor(Math.random() * colors.length)],
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 2.0
       });
     }
     return list;
   }, []);
 
+  useFrame((state) => {
+    if (!lightsRef.current) return;
+    const t = state.clock.getElapsedTime();
+    
+    lightsRef.current.children.forEach((child, i) => {
+      const lightData = lights[i];
+      if (!lightData) return;
+      
+      const mesh = child as THREE.Mesh;
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      const intensity = 0.5 + Math.sin(t * lightData.speed + lightData.phase) * 0.5;
+      
+      material.emissiveIntensity = 1 + intensity * 2;
+      
+      // Optional: Blink logic (completely off/on)
+      // mesh.visible = Math.sin(t * lightData.speed + lightData.phase) > 0;
+    });
+  });
+
   return (
-    <group>
+    <group ref={lightsRef}>
       {lights.map((l, i) => (
         <mesh key={i} position={l.pos} castShadow>
           <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial color={l.color} emissive={l.color} emissiveIntensity={2} toneMapped={false} />
-          <pointLight color={l.color} intensity={0.5} distance={1.5} decay={2} />
+          <meshStandardMaterial 
+            color={l.color} 
+            emissive={l.color} 
+            emissiveIntensity={2} 
+            toneMapped={false} 
+          />
+          <pointLight 
+            color={l.color} 
+            intensity={0.3} 
+            distance={1.0} 
+            decay={2} 
+          />
         </mesh>
       ))}
     </group>

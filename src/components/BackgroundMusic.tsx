@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 
 const BackgroundMusic = () => {
-    const [isMuted, setIsMuted] = useState(false); // Start unmuted as requested
+    const [isMuted, setIsMuted] = useState(true); // Start muted to satisfy autoplay policies often
     const [isPlaying, setIsPlaying] = useState(false);
-    const playerRef = useRef<any>(null);
+    const [player, setPlayer] = useState<any>(null);
+    const [showHint, setShowHint] = useState(false);
 
     // Video ID and timing
     // Video: 12 Dev Adam
@@ -14,8 +15,8 @@ const BackgroundMusic = () => {
     const END_TIME = 86;   // 1:26
 
     const opts: YouTubeProps['opts'] = {
-        height: '1',
-        width: '1',
+        height: '0',
+        width: '0',
         playerVars: {
             autoplay: 1,
             start: START_TIME,
@@ -23,26 +24,44 @@ const BackgroundMusic = () => {
             controls: 0,
             modestbranding: 1,
             loop: 1,
-            playlist: VIDEO_ID,
+            playlist: VIDEO_ID, // Required for loop to work
+            playsinline: 1, // iOS
         },
     };
 
     const onPlayerReady: YouTubeProps['onReady'] = (event) => {
         console.log('Music Player Ready', event);
-        playerRef.current = event.target;
-        // Attempt to play immediately
+        setPlayer(event.target);
+        
+        // Try to play
         event.target.playVideo();
-
-        if (isMuted) {
-            event.target.mute();
-        } else {
-            event.target.unMute();
-            event.target.setVolume(50);
-        }
+        
+        // Try to unmute after a short delay, but if it fails/blocks, we stay muted
+        setTimeout(() => {
+            try {
+                // Determine if we can unmute
+                // Note: YouTube API doesn't throw easily on mute/unmute, 
+                // but real autoplay with sound usually blocks unless user interacted.
+                // We'll trust the user to unmute if they want to hear it.
+                // However, we can TRY to unmute if the browser allows.
+                // event.target.unMute(); 
+                // setIsMuted(false);
+                
+                // Better strategy: Start muted (state=true), show hint to user
+                setShowHint(true);
+            } catch (e) {
+                console.warn("Autoplay with sound blocked", e);
+            }
+        }, 1000);
     };
 
     const onError: YouTubeProps['onError'] = (error) => {
         console.error('YouTube Player Error:', error);
+        // Try to recover by reloading or muting
+        if (player) {
+            player.mute();
+            player.playVideo();
+        }
     };
 
     const onStateChange: YouTubeProps['onStateChange'] = (event) => {
@@ -55,27 +74,47 @@ const BackgroundMusic = () => {
         if (event.data === 1) {
             setIsPlaying(true);
         }
-    };
-
-    const toggleMute = () => {
-        if (playerRef.current) {
-            if (isMuted) {
-                playerRef.current.unMute();
-                playerRef.current.setVolume(50);
-            } else {
-                playerRef.current.mute();
-            }
-            setIsMuted(!isMuted);
+        // 2 = PAUSED
+        if (event.data === 2) {
+           setIsPlaying(false);
+           // Force resume if it wasn't a user action (hard to detect, but we want bg music)
+           // event.target.playVideo(); 
         }
     };
 
+    const toggleMute = () => {
+        if (player) {
+            if (isMuted) {
+                player.unMute();
+                player.setVolume(50);
+                setIsMuted(false);
+                setShowHint(false); // Hide hint once interacted
+            } else {
+                player.mute();
+                setIsMuted(true);
+            }
+        }
+    };
+
+    // Auto-hide hint after 10 seconds
+    if (showHint) {
+        setTimeout(() => setShowHint(false), 10000);
+    }
+
     return (
-        <div className="fixed bottom-4 right-4 z-50">
-            <div className="bg-gray-800/80 backdrop-blur-md p-2 rounded-full border border-gray-600 shadow-xl flex items-center gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+            {/* Hint Bubble */}
+            {showHint && (
+                <div className="bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg text-sm border border-white/20 animate-fade-in mb-2 shadow-lg">
+                    🎵 Müzik için tıklayın
+                </div>
+            )}
+
+            <div className={`bg-gray-800/80 backdrop-blur-md p-2 rounded-full border border-gray-600 shadow-xl flex items-center gap-2 transition-all duration-300 ${isMuted || !isPlaying ? 'opacity-75 hover:opacity-100' : 'opacity-100'}`}>
                 <button
                     onClick={toggleMute}
                     className="p-2 text-white hover:bg-gray-700 rounded-full transition-colors relative group"
-                    title={isMuted ? "Unmute Music" : "Mute Music"}
+                    title={isMuted ? "Sesi Aç" : "Sesi Kapat"}
                 >
                     {isMuted ? (
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,11 +126,6 @@ const BackgroundMusic = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                         </svg>
                     )}
-
-                    {/* Tooltip */}
-                    <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                        {isMuted ? "Sesi Aç" : "Sesi Kapat"}
-                    </span>
                 </button>
 
                 {/* Simple visualizer bars */}
@@ -105,7 +139,7 @@ const BackgroundMusic = () => {
                 )}
             </div>
 
-            <div className="absolute opacity-0 pointer-events-none top-0 left-0">
+            <div className="hidden">
                 <YouTube
                     videoId={VIDEO_ID}
                     opts={opts}
