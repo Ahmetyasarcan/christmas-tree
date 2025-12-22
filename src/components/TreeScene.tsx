@@ -16,8 +16,10 @@ export default function TreeScene(props: TreeSceneProps) {
     <Canvas
       camera={{ position: [0, 5, 12], fov: 50 }}
       shadows
+      dpr={[1, 1.5]} // Clamp pixel ratio for performance
+      performance={{ min: 0.5 }} // Allow performance degradation
       style={{ width: '100%', height: '100%' }}
-      gl={{ antialias: true, alpha: false }}
+      gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }} // Disable AA for perf
     >
       <fog attach="fog" args={['#0a0e27', 10, 40]} />
       <color attach="background" args={['#0a0e27']} />
@@ -65,8 +67,8 @@ function TreeContents({ notes, profiles, onTreeClick, hideLabels }: TreeScenePro
         intensity={1.2}
         castShadow
         color="#fff8e1"
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-bias={-0.0001}
       />
 
@@ -74,7 +76,7 @@ function TreeContents({ notes, profiles, onTreeClick, hideLabels }: TreeScenePro
       <spotLight position={[5, 5, -5]} intensity={0.5} color="#ffd700" angle={0.5} />
       <pointLight position={[0, 4, 0]} intensity={0.8} color="#ffeb3b" distance={8} decay={2} />
 
-      <Stars radius={50} depth={50} count={1000} factor={4} fade speed={0.5} />
+      <Stars radius={50} depth={50} count={500} factor={4} fade speed={0.5} />
       <Snow />
 
       <group
@@ -139,7 +141,7 @@ function TreeContents({ notes, profiles, onTreeClick, hideLabels }: TreeScenePro
 
 function Snow() {
   const meshRef = useRef<THREE.Points>(null!);
-  const count = 1500;
+  const count = 600;
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count * 3; i++) arr[i] = (Math.random() - 0.5) * 40;
