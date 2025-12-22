@@ -14,6 +14,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   if (loading) {
     return (
@@ -46,17 +47,56 @@ export default function AuthGate({ children }: AuthGateProps) {
           setSubmitting(false);
           return;
         }
-        await signUp(email, password);
-        // Signup sonrası profil ekranına düşecek
+        const { user: newUser, session } = await signUp(email, password);
+        
+        // If signup successful but no session, it means email verification is required
+        if (newUser && !session) {
+          setVerificationSent(true);
+          return;
+        }
       } else {
         await signIn(email, password);
       }
     } catch (err: any) {
-      setError(err.message || 'Kimlik doğrulama hatası');
+      console.error('Auth error:', err);
+      if (err.status === 429) {
+        setError('Çok fazla başarısız deneme yaptınız. Lütfen bir süre bekleyip tekrar deneyin.');
+      } else if (err.message?.includes('Invalid login credentials')) {
+        setError('E-posta veya şifre hatalı.');
+      } else if (err.message?.includes('Email not confirmed')) {
+        setError('Lütfen önce e-posta adresinizi doğrulayın.');
+      } else if (err.message?.includes('User already registered')) {
+        setError('Bu e-posta ile zaten bir kayıt var.');
+      } else {
+        setError('Bir hata oluştu: ' + (err.message || 'Bilinmeyen hata'));
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg text-center">
+          <div className="text-5xl mb-4">📧</div>
+          <h2 className="text-2xl font-bold text-white mb-4">E-posta Doğrulaması</h2>
+          <p className="text-gray-300 mb-6">
+            Kayıt işlemini tamamlamak için lütfen <strong>{email}</strong> adresine gönderilen doğrulama bağlantısına tıklayın.
+          </p>
+          <div className="p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg text-yellow-200 text-sm mb-6">
+            Not: Maili göremiyorsanız spam klasörünü kontrol etmeyi unutmayın.
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-green-400 hover:text-green-300 underline"
+          >
+            Giriş sayfasına dön
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
