@@ -82,11 +82,29 @@ const BackgroundMusic = () => {
         }
     };
 
+
+
+    const [volume, setVolume] = useState(30);
+
+    // ... (existing code)
+
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newVol = Number(e.target.value);
+        setVolume(newVol);
+        if (player) {
+            player.setVolume(newVol);
+            if (newVol > 0 && isMuted) {
+                player.unMute();
+                setIsMuted(false);
+            }
+        }
+    };
+
     const toggleMute = () => {
         if (player) {
             if (isMuted) {
                 player.unMute();
-                player.setVolume(50);
+                player.setVolume(volume);
                 setIsMuted(false);
                 setShowHint(false); // Hide hint once interacted
             } else {
@@ -102,7 +120,7 @@ const BackgroundMusic = () => {
     }
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 group">
             {/* Hint Bubble */}
             {showHint && (
                 <div className="bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg text-sm border border-white/20 animate-fade-in mb-2 shadow-lg">
@@ -110,10 +128,29 @@ const BackgroundMusic = () => {
                 </div>
             )}
 
+            {/* Volume Slider - Visible on Hover */}
+            <div className="absolute bottom-14 right-0 bg-gray-800/90 backdrop-blur-md p-3 rounded-xl border border-gray-600 shadow-xl transition-all duration-300 opacity-0 translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible flex flex-col items-center gap-2 w-12">
+                <div className="h-24 w-1.5 bg-gray-600 rounded-full relative overflow-hidden">
+                    <div 
+                        className="absolute bottom-0 w-full bg-green-500 rounded-full transition-all duration-150"
+                        style={{ height: `${isMuted ? 0 : volume}%` }}
+                    />
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className="absolute bottom-0 left-0 w-24 h-6 -rotate-90 origin-bottom-left translate-x-1.5 opacity-0 cursor-pointer"
+                    />
+                </div>
+                <span className="text-xs text-white font-medium">{isMuted ? 0 : volume}</span>
+            </div>
+
             <div className={`bg-gray-800/80 backdrop-blur-md p-2 rounded-full border border-gray-600 shadow-xl flex items-center gap-2 transition-all duration-300 ${isMuted || !isPlaying ? 'opacity-75 hover:opacity-100' : 'opacity-100'}`}>
                 <button
                     onClick={toggleMute}
-                    className="p-2 text-white hover:bg-gray-700 rounded-full transition-colors relative group"
+                    className="p-2 text-white hover:bg-gray-700 rounded-full transition-colors relative"
                     title={isMuted ? "Sesi Aç" : "Sesi Kapat"}
                 >
                     {isMuted ? (
