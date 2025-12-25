@@ -95,7 +95,7 @@ export default function TreePage() {
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold text-white">🎄 İnteraktif Yılbaşı Ağacı</h1>
-          <span className="text-gray-400 text-sm">Gizli Notlar</span>
+
         </div>
 
           <div className="hidden md:block">
